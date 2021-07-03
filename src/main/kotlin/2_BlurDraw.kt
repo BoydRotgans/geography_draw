@@ -1,6 +1,7 @@
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.*
+import org.openrndr.extra.fx.blur.GaussianBlur
 import org.openrndr.extra.gui.addTo
 import org.openrndr.extra.videoprofiles.ProresProfile
 import org.openrndr.ffmpeg.ScreenRecorder
@@ -20,7 +21,7 @@ fun main() = application {
         var frame = 0
 
         val sourceTarget = 1
-        val blur = false
+        val blur = true
         val maxFrames = listOf(2009, 2040, 3000)
 
         extend(ScreenRecorder().apply {
@@ -29,6 +30,10 @@ fun main() = application {
             outputFile = "video/scene_${sourceTarget}_blur_${blur}.mov"
             maximumFrames = maxFrames.get(sourceTarget).toLong()
         })
+
+        val gblur = GaussianBlur()
+        var canvas = colorBuffer(width, height)
+        var contour = colorBuffer(width, height)
 
         extend {
             drawer.background(ColorRGBa.BLACK)
@@ -58,22 +63,22 @@ fun main() = application {
             }
 
 
-            drawer.image(rgbImage)
+                drawer.image(rgbImage)
 
 
                 drawer.isolated {
                     atMasks.forEachIndexed { index, colorBuffer ->
-                        if (index % 5 == 0) {
-//                    blur.apply {
-//                        spread =  5.0 + Math.abs(Math.sin(seconds*0.1+index*0.1)) * 5.0
-//                    }
-//                    blur.apply( cbBackList.get( index), canvas)
+                        if (index % 2 == 0) {
+                            gblur.apply {
+                        spread =  15.0 + Math.abs(Math.sin(seconds*0.1+index*0.1)) * 15.0
+                    }
+                    gblur.apply( atRgbs.get(index), canvas)
                             drawer.shadeStyle = shadeStyle {
                                 fragmentTransform = """
                         vec2 textSize = textureSize(p_texture, 0);
                         //vec2 uv = (c_screenPosition + vec2(p_count, 0.0) ) /  textSize;
-                        //vec2 uv = (c_screenPosition - vec2( (cos(((p_count*0.1)-p_seconds*0.01)))*10.0, 0.0)) / textSize;
-                        vec2 uv = (c_screenPosition) /  textSize;
+                        vec2 uv = (c_screenPosition - vec2( (cos(((p_count*0.04)-p_seconds*0.1)))*25.0, 0.0)) / textSize;
+                        //vec2 uv = (c_screenPosition) /  textSize;
 
                         vec4 image = texture(p_texture,  1.0-vec2(1.0-uv.x, uv.y)).rgba;
                         float colorFill = 1.0  - (sin((p_seconds*0.01)+(p_count*0.1))) *0.25 ; //  1.0; //
@@ -85,21 +90,18 @@ fun main() = application {
 
                         x_fill.rgba = vec4( image.r*colorFill,  image.g*colorFill, image.b*colorFill, alpha);
                         """.trimIndent()
-                                parameter("texture", atRgbs.get(index))
+                                parameter("texture", canvas)
                                 parameter("count", index)
                                 parameter("seconds", seconds)
                                 parameter("fillIn", ColorRGBa.PINK)
                             }
-//                    blur.apply {
-//                        window = 5
-//                        spread =  10.0
-//                        gain = 1.0
-//                gain = 1.5
-//                    }
-//                    blur.apply( colorBuffer, countour)
+                            gblur.apply {
 
+                                spread =  1.0 + Math.abs(Math.sin(seconds*0.1+index*0.1)) * 5.0
 
-                            drawer.image(colorBuffer)
+                            }
+                            gblur.apply( colorBuffer, contour)
+                            drawer.image(contour)
                         }
                     }
                 }
