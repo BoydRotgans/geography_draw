@@ -20,7 +20,7 @@ fun main() = application {
 
         var frame = 0
 
-        val sourceTarget = 1
+        val sourceTarget = 2
         val blur = true
         val maxFrames = listOf(2009, 2040, 3000)
 

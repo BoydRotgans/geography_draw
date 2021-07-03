@@ -16,13 +16,10 @@ fun main() = application {
 
     program {
 
-        val atMasks = mutableListOf<ColorBuffer>()
-        val atRgbs = mutableListOf<ColorBuffer>()
-
         var frame = 0
 
-        val sourceTarget = 0
-        val blur = true
+        val sourceTarget = 2
+
         val maxFrames = listOf(2009, 2040, 3000)
 
         extend(ScreenRecorder().apply {
@@ -31,9 +28,7 @@ fun main() = application {
             maximumFrames = maxFrames.get(sourceTarget).toLong()
         })
 
-        val gblur = GaussianBlur()
-        var canvas = colorBuffer(width, height)
-        var contour = colorBuffer(width, height)
+
 
         val plain = renderTarget(width, height) {
             colorBuffer()
@@ -57,7 +52,11 @@ fun main() = application {
 
             drawer.isolatedWithTarget(rt) {
                 drawer.clear(ColorRGBa.BLACK)
-                drawer.translate(-4.0, -4.0)
+                if(frame < 1080) {
+                    drawer.translate(-4.0, -4.0)
+                } else {
+                    drawer.translate(4.0, 4.0)
+                }
                 drawer.image(rgbImage)
             }
 

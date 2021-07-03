@@ -19,13 +19,12 @@ fun main() = application {
 
         var frame = 0
 
-        val sourceTarget = 1
+        val sourceTarget = 2
         val blur = false
         val maxFrames = listOf(2009, 2040, 3000)
 
         extend(ScreenRecorder().apply {
             frameRate = 30
-            profile = ProresProfile()
             outputFile = "video/scene_${sourceTarget}_blur_${blur}.mov"
             maximumFrames = maxFrames.get(sourceTarget).toLong()
         })
@@ -42,7 +41,12 @@ fun main() = application {
 
             drawer.isolatedWithTarget(rt) {
                 drawer.clear(ColorRGBa.BLACK)
-                drawer.translate(-4.0, -4.0)
+                if(frame < 1080) {
+                    drawer.translate(-4.0, -4.0)
+                } else {
+                    drawer.translate(4.0, 4.0)
+                }
+
                 drawer.image(rgbImage)
             }
 
@@ -52,7 +56,6 @@ fun main() = application {
             if( atMasks.size>150) {
                 atMasks[0].destroy()
                 atRgbs[0].destroy()
-
                 atMasks.removeAt(0)
                 atRgbs.removeAt(0)
             }
@@ -63,7 +66,7 @@ fun main() = application {
 
                 drawer.isolated {
                     atMasks.forEachIndexed { index, colorBuffer ->
-                        if (index % 5 == 0) {
+                        if (index % 1 == 0) {
 //                    blur.apply {
 //                        spread =  5.0 + Math.abs(Math.sin(seconds*0.1+index*0.1)) * 5.0
 //                    }
@@ -79,7 +82,7 @@ fun main() = application {
                         float colorFill = 1.0  - (sin((p_seconds*0.01)+(p_count*0.1))) *0.25 ; //  1.0; //
 
                         float alpha = 1.0;
-                        if(x_fill.r > 0.5) {
+                        if(x_fill.r < 0.5) {
                             alpha = 0.0;
                         }
 
@@ -113,7 +116,7 @@ fun main() = application {
                             vec4 image = texture(p_texture,  1.0-vec2(1.0-uv.x, uv.y)).rgba;
     
                             float alpha = 1.0;
-                            if(x_fill.r > 0.5) {
+                            if(x_fill.r < 0.5) {
                                 alpha = 0.0;
                             }
                             x_fill.rgba = vec4( image.r, image.g, image.b, alpha);
