@@ -14,34 +14,34 @@ fun main() = application {
 
     program {
 
-
-
-        val frameCount = 10
         val atMasks = mutableListOf<ColorBuffer>()
         val atRgbs = mutableListOf<ColorBuffer>()
 
         var frame = 0
 
+        val sourceTarget = 0
+        val blur = false
+        val maxFrames = listOf(2010, 2040, 3000)
 
         extend(ScreenRecorder().apply {
             frameRate = 30
             profile = ProresProfile()
-            outputFile = "video/scene_1_solid.mov"
-            maximumFrames = 2010
+            outputFile = "video/scene_${sourceTarget}_blur_${blur}.mov"
+            maximumFrames = maxFrames.get(sourceTarget).toLong()
         })
-
 
         extend {
             drawer.background(ColorRGBa.BLACK)
 
-            val maskImage: ColorBuffer = loadImage("data/frames/MASK1/mask${frame}.jpg")
-            val rgbImage: ColorBuffer = loadImage("data/frames/RGB1/rgb${frame}.jpg")
+            val maskImage: ColorBuffer = loadImage("data/frames/MASK${sourceTarget}/mask${frame}.jpg")
+            val rgbImage: ColorBuffer = loadImage("data/frames/RGB${sourceTarget}/rgb${frame}.jpg")
 
-            var rt = renderTarget(width, height) {
+            val rt = renderTarget(width, height) {
                 colorBuffer()
             }
 
             drawer.isolatedWithTarget(rt) {
+                drawer.clear(ColorRGBa.BLACK)
                 drawer.translate(-4.0, -4.0)
                 drawer.image(rgbImage)
             }
@@ -58,7 +58,7 @@ fun main() = application {
             }
 
 
-            drawer.image(atRgbs.last())
+            drawer.image(rgbImage)
 
 
                 drawer.isolated {
